@@ -41,6 +41,23 @@ router.post('/create', function(req, res){
 });
 
 
+//Assuming send to only one email id 
+router.post('/send', function(req, res){
+    var email_id = req.body.email_id;
+    var to = req.body.to;
+
+    var sql = "INSERT INTO Actions(email_id, user_id, state, folder) VALUES \
+        (" + email_id + ", " + to + ", 'unread', 'inbox')";
+    console.log(sql);
+    
+    con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("Email sent!");
+        res.json({"message": "Done!"});
+    });
+});
+
+
 app.use('/', router);
 
 
