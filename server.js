@@ -15,7 +15,7 @@ router.get('/login', function(req, res) {
 });
 
 //First it will always be created as Drafts
-router.post('/create', function(req, res){
+router.post('/compose', function(req, res){
     var owner_id = req.body.user_id;
     var subject = req.body.subject;
     var body = req.body.body;
@@ -52,8 +52,96 @@ router.post('/send', function(req, res){
     
     con.query(sql, function (err, result) {
         if (err) throw err;
-        console.log("Email sent!");
+        sql = "UPDATE Emails SET type='sent' WHERE \
+                id = " + email_id;
+        con.query(sql, function (err, result) {
+            if (err) throw err;
+            console.log("Email sent!");
+            sql = "UPDATE Emails SET type='sent' WHERE \
+                    id = " + email_id;
+            res.json({"message": "Done!"});
+        });        
+    });
+});
+
+
+router.post('/read', function(req, res){
+    var email_id = req.body.email_id;
+    var user_id = req.body.user_id;
+
+    var sql = "UPDATE Actions SET state='read' WHERE email_id="+email_id+" AND user_id="+user_id;
+    console.log(sql);
+    
+    con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("Email Reads!");
         res.json({"message": "Done!"});
+    });
+});
+
+
+router.post('/trash', function(req, res){
+    var email_id = req.body.email_id;
+    var user_id = req.body.user_id;
+
+    var sql = "UPDATE Actions SET folder='trash' WHERE email_id="+email_id+" AND user_id="+user_id;
+    console.log(sql);
+    
+    con.query(sql, function (err, result) {
+        if (err) throw err;
+        console.log("Email Trashed!");
+        res.json({"message": "Done!"});
+    });
+});
+
+
+router.get('/inbox/:user_id', function(req,res){
+    var user_id = req.params.user_id;
+
+    var sql = "SELECT * FROM Actions a JOIN Emails e ON a.email_id = e.id WHERE a.user_id = "+user_id+" AND a.folder = 'inbox'";
+    console.log(sql);
+    con.query(sql, function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        res.json(result);
+    });
+});
+
+router.get('/trash/:user_id', function(req,res){
+    var user_id = req.params.user_id;
+
+    var sql = "SELECT * FROM Actions a JOIN Emails e ON a.email_id = e.id WHERE a.user_id = "+user_id+" AND a.folder = 'trash'";
+    console.log(sql);
+    con.query(sql, function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        res.json(result);
+    });
+});
+
+router.get('/inbox/read/:user_id', function(req,res){
+    var user_id = req.params.user_id;
+
+    var sql = "SELECT * FROM Actions a JOIN Emails e ON a.email_id = e.id \
+            WHERE a.user_id = "+user_id+" AND a.folder = 'inbox' AND a.state='read'";
+    console.log(sql);
+    con.query(sql, function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        res.json(result);
+    });
+});
+
+router.get('/inbox/unread/:user_id', function(req,res){
+    var user_id = req.params.user_id;
+
+    var sql = "SELECT * FROM Actions a JOIN Emails e ON a.email_id = e.id \
+            WHERE a.user_id = "+user_id+" AND a.folder = 'inbox' AND a.state='unread'";
+    console.log(sql);
+    con.query(sql, function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        res.json(result);
     });
 });
 
