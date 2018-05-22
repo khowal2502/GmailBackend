@@ -107,6 +107,19 @@ router.get('/inbox/:user_id', function(req,res){
     });
 });
 
+router.get('/sent/:user_id', function(req,res){
+    var user_id = req.params.user_id;
+
+    var sql = "SELECT * FROM Emails e WHERE owner_id = "+user_id+" AND type = 'sent'";
+    console.log(sql);
+    con.query(sql, function (err, result, fields) {
+        if (err) throw err;
+        console.log(result);
+        res.json(result);
+    });
+});
+
+
 router.get('/trash/:user_id', function(req,res){
     var user_id = req.params.user_id;
 
